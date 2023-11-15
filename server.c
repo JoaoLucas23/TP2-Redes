@@ -40,9 +40,10 @@ void * client_thread(void *data) {
     while (1)
     {
         size_t count = recv(cdata->csock, operation, sizeof(struct BlogOperation), 0);
-
+        trata_mensagem_cliente(operation, cliente);
         imprime_mensagem_servidor(operation);
 
+        gera_resposta(operation);
         count = send(cdata->csock, operation, sizeof(struct BlogOperation), 0);
         if(count != sizeof(struct BlogOperation)) {
             logexit("send");

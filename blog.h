@@ -16,6 +16,7 @@ struct BlogOperation {
 struct ClienteConectado{ 
     int id;
     int* topicos_inscritos;
+    int qtd_topicos_inscritos;
 };
 
 void iniciaBlogOperation(struct BlogOperation* operation);
@@ -25,3 +26,5 @@ void iniciaCliente(struct ClienteConectado* cliente, struct ClienteConectado* cl
 void imprime_mensagem_servidor(struct BlogOperation* operation);
 
 void le_mensagem_cliente(char* buf, struct BlogOperation* operation);
+
+void le_resposta_servidor(struct BlogOperation* operation, int* client_id);

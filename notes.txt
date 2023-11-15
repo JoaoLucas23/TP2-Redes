@@ -11,7 +11,7 @@
 TO-DO
     1- Conexao de multiplos clientes                        |   OK
     2- Servidor criar id do cliente e o informar            |   OK
-    3- Estruturar troca de mensagens                        |
+    3- Estruturar troca de mensagens                        |   OK
     4- Servidor armazenar clientes                          |
     5- Servidor armazenar topicos e clientes inscritos      |
     6- Cliente se inscrever em um topico                    |

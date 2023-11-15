@@ -11,6 +11,8 @@
 
 #define BUFSZ 1024
 
+int client_id = 0;
+
 void usage(int argc, char **argv) {
     printf("usage %s <%s> <%s>\n", argv[0],argv[1],argv[2]);
     printf("example: %s 127.0.0.1 51511", argv[0]);
@@ -52,12 +54,17 @@ int main(int argc, char **argv) {
 
         le_mensagem_cliente(buf, operation);
 
+        operation->client_id = client_id;
+
         size_t count = send(s, operation, sizeof(struct BlogOperation), 0);
         if(count != sizeof(struct BlogOperation)) {
             logexit("send");
         }
 
         count = recv(s, operation, sizeof(struct BlogOperation), 0);
+
+        le_resposta_servidor(operation, &client_id);
+
     }
     close(s);
     exit(EXIT_SUCCESS);
