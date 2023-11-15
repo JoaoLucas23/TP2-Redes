@@ -31,23 +31,20 @@ void * client_thread(void *data) {
     char caddrstr[BUFSZ];
     addrtostr(caddr, caddrstr, BUFSZ);
 
-    struct BlogOperation operation;
-    iniciaBlogOperation(&operation);
-    struct ClienteConectado cliente;
-    iniciaCliente(&cliente, clientes_conectados, &operation);
-    printf("client %d connected\n", cliente.id);
+    struct BlogOperation* operation = malloc(sizeof(struct BlogOperation));
+    iniciaBlogOperation(operation);
+    struct ClienteConectado* cliente = malloc(sizeof(struct ClienteConectado));
+    iniciaCliente(cliente, clientes_conectados, operation);
+    printf("client %d connected\n", cliente->id);
     
     while (1)
     {
-        char buf[BUFSZ];
-        memset(buf,0,BUFSZ);
-        size_t count = recv(cdata->csock, buf, BUFSZ, 0);
+        size_t count = recv(cdata->csock, operation, sizeof(struct BlogOperation), 0);
 
-        printf("[msg] %s, %d bytes: %s\n", caddrstr,(int)count, buf);
+        imprime_mensagem_servidor(operation);
 
-        sprintf(buf, "remote endpoint: %.1000s\n", caddrstr);
-        count = send(cdata->csock, buf, strlen(buf)+1, 0);
-        if(count != strlen(buf)+1) {
+        count = send(cdata->csock, operation, sizeof(struct BlogOperation), 0);
+        if(count != sizeof(struct BlogOperation)) {
             logexit("send");
         }
         

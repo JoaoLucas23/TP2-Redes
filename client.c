@@ -1,4 +1,5 @@
 #include "common.h"
+#include "blog.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,7 +12,7 @@
 #define BUFSZ 1024
 
 void usage(int argc, char **argv) {
-    printf("usage %s <server IP> <server port>\n", argv[0]);
+    printf("usage %s <%s> <%s>\n", argv[0],argv[1],argv[2]);
     printf("example: %s 127.0.0.1 51511", argv[0]);
     exit(EXIT_FAILURE);
 }
@@ -40,35 +41,24 @@ int main(int argc, char **argv) {
 
     char addrstr[BUFSZ];
 
+    struct BlogOperation* operation = malloc(sizeof(struct BlogOperation));
+
     addrtostr(addr, addrstr, BUFSZ);
-    printf("connected to %s \n", addrstr);
-
-    char buf[BUFSZ];
-    memset(buf, 0, BUFSZ);
-    printf("mensagem> ");
-    fgets(buf, BUFSZ-1, stdin);
-    size_t count = send(s, buf, strlen(buf)+1, 0);
-
-    if(count != strlen(buf)+1) {
-        logexit("send");
-    }
-
-    memset(buf, 0, BUFSZ);
-    unsigned total = 0;
     while (1)
-    {
-        count = recv(s, buf + total, BUFSZ - total, 0);
-        if(count == 0) {
-            // conexao fechada
-            break;
+    {   
+        char buf[BUFSZ];
+        memset(buf, 0, BUFSZ);
+        fgets(buf, BUFSZ-1, stdin);
+
+        le_mensagem_cliente(buf, operation);
+
+        size_t count = send(s, operation, sizeof(struct BlogOperation), 0);
+        if(count != sizeof(struct BlogOperation)) {
+            logexit("send");
         }
-        total += count;
+
+        count = recv(s, operation, sizeof(struct BlogOperation), 0);
     }
-    
     close(s);
-
-    printf("received %u bytes\n", total);
-    puts(buf);
-
     exit(EXIT_SUCCESS);
 }
