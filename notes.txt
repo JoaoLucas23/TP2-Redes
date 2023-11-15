@@ -1,0 +1,10 @@
+. Servidor -> armazena os posts
+           -> armazena os clientes conectados e seus ids
+           -> armazena os tópicos disponíveis para serem seguidos
+
+. Cliente  -> armazena seu próprio id
+           -> escrevem posts
+           -> se inscrevem em tópicos
+           -> recebem notificação de novo post no tópico inscrito
+
+    
