@@ -14,7 +14,7 @@
 struct ClienteConectado* clientes_conectados;
 struct Topico* topicos_criados;
 
-int qtd_topicos;
+int* qtd_topicos;
 int qtd_clientes;
 
 void usage(int argc, char **argv) {
@@ -43,16 +43,16 @@ void * client_thread(void *data) {
     
     while (1)
     {
+        //gera_resposta(operation, topicos_criados);
         size_t count = recv(cdata->csock, operation, sizeof(struct BlogOperation), 0);
         trata_mensagem_cliente(operation, cliente,topicos_criados,qtd_topicos);
         imprime_mensagem_servidor(operation);
 
-        gera_resposta(operation, topicos_criados);
         count = send(cdata->csock, operation, sizeof(struct BlogOperation), 0);
         if(count != sizeof(struct BlogOperation)) {
             logexit("send");
         }
-        
+
     }
     close(cdata->csock);
     pthread_exit(EXIT_SUCCESS);
@@ -93,6 +93,10 @@ int main(int argc, char **argv) {
     printf("bound to %s, waiting connections \n", addrstr);
 
     clientes_conectados = (struct ClienteConectado *)malloc(10 * sizeof(struct ClienteConectado));
+    topicos_criados = (struct Topico *)malloc(10 * sizeof(struct Topico));
+    qtd_topicos = (int*)malloc(sizeof(int));
+
+    (*qtd_topicos) = 0;
 
     while (1)
     {

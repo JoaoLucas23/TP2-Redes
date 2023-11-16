@@ -11,7 +11,7 @@
 
 #define BUFSZ 1024
 
-int client_id = 0;
+int* client_id = 0;
 
 void usage(int argc, char **argv) {
     printf("usage %s <%s> <%s>\n", argv[0],argv[1],argv[2]);
@@ -44,6 +44,7 @@ int main(int argc, char **argv) {
     char addrstr[BUFSZ];
 
     struct BlogOperation* operation = malloc(sizeof(struct BlogOperation));
+    client_id = malloc(sizeof(int));
 
     addrtostr(addr, addrstr, BUFSZ);
     while (1)
@@ -52,9 +53,7 @@ int main(int argc, char **argv) {
         memset(buf, 0, BUFSZ);
         fgets(buf, BUFSZ-1, stdin);
 
-        le_mensagem_cliente(buf, operation);
-
-        operation->client_id = client_id;
+        le_mensagem_cliente(buf, operation, *(client_id));
 
         size_t count = send(s, operation, sizeof(struct BlogOperation), 0);
         if(count != sizeof(struct BlogOperation)) {
@@ -63,7 +62,7 @@ int main(int argc, char **argv) {
 
         count = recv(s, operation, sizeof(struct BlogOperation), 0);
 
-        le_resposta_servidor(operation, &client_id);
+        le_resposta_servidor(operation, client_id);
 
     }
     close(s);

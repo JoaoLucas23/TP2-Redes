@@ -9,6 +9,8 @@ void iniciaCliente(struct ClienteConectado* cliente, struct ClienteConectado* cl
         {
             clientes_conectados[i].id = i+1;
             cliente->id = i+1;
+            cliente->qtd_topicos_inscritos = 0;
+            cliente->topicos_inscritos = (int*)malloc(10*sizeof(int));
             operation->client_id = i+1;
             operation->server_response = 1;
             break;
@@ -66,11 +68,12 @@ int traduz_acao(char* acao) {
     return -1;
 }
 
-void le_mensagem_cliente(char* buf, struct BlogOperation* operation) {
+void le_mensagem_cliente(char* buf, struct BlogOperation* operation, int client_id) {
     buf = strtok(buf, " \n");
 
     operation->operation_type = traduz_acao(buf);
     operation->server_response = 0;
+    operation->client_id = client_id;
 
     switch (operation->operation_type)
     {
@@ -117,28 +120,36 @@ void le_resposta_servidor(struct BlogOperation* operation, int* client_id) {
     switch (operation->operation_type)
     {
     case 1:
-        client_id = operation->client_id;
+        *(client_id) = operation->client_id;
         break;
     case 2:
-        printf("new post added in %s by %d\n%s",operation->topic,operation->client_id,operation->content);
+        printf("new post added in %s by %d\n%s\n",operation->topic,operation->client_id,operation->content);
     break;
+    case 3:
+        imprime_topicos_criados(operation->content);
     default:
         break;
     } 
     
 }
 
-void inscreve_cliente_topico(int topico, struct ClienteConectado* cliente, int tipo_operacao) {
+void inscreve_cliente_topico(char* topico, struct ClienteConectado* cliente, int tipo_operacao,struct Topico* topicos, int* qtd_topicos) {
+
+    int topico_id = verifica_topico(topico,topicos,*qtd_topicos);
+
+    if (topico_id==0) cria_topico(topico,topicos, qtd_topicos);
+
     for (int i = 0; i < cliente->qtd_topicos_inscritos; i++)
     {
-        if (topico==cliente->topicos_inscritos[i])
+        if (topico_id==cliente->topicos_inscritos[i])
         {
             if(tipo_operacao==4) printf("Ja inscrito\n");
             return;
         }
     }
+
+    cliente->topicos_inscritos[cliente->qtd_topicos_inscritos] = topico_id;
     cliente->qtd_topicos_inscritos++;
-    cliente->topicos_inscritos[cliente->qtd_topicos_inscritos-1] = topico;
 }
 
 void desinscreve_cliente_topico(int topico, struct ClienteConectado* cliente) {
@@ -153,23 +164,31 @@ void desinscreve_cliente_topico(int topico, struct ClienteConectado* cliente) {
     // }
 }
 
-void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConectado* cliente, struct Topico* topicos, int qtd_topicos) {
+void cria_novo_post(struct BlogOperation* operation,struct Topico* topicos) {
+}
 
-    int topico = traduz_topico(operation->topic,topicos, qtd_topicos);
+void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConectado* cliente, struct Topico* topicos, int* qtd_topicos) {
+
+    operation->server_response = 1;
+
+    int topico = traduz_topico(operation->topic,topicos, *qtd_topicos);
+
+    if (operation->client_id == 0)
+    {
+        operation->client_id = cliente->id;
+    }
 
     switch (operation->operation_type)
     {
-    case 1:
-        //iniciaCliente(cliente)
-        break;
     case 2:
-        inscreve_cliente_topico(topico,cliente,operation->operation_type);
+        inscreve_cliente_topico(operation->topic,cliente,operation->operation_type,topicos, qtd_topicos);
+        cria_novo_post(operation,topicos);
         break;
     case 3:
-        lista_topicos_criados();
+        memcpy(operation->content,lista_topicos_criados(topicos, *qtd_topicos),255);
         break;
     case 4:
-        inscreve_cliente_topico(topico,cliente,operation->operation_type);
+        inscreve_cliente_topico(operation->topic,cliente,operation->operation_type,topicos, qtd_topicos);
         break;
     case 5:
         printf("client %d disconnected\n", cliente->id);

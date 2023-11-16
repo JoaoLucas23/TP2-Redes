@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
+#include "topico.h"
 
 struct BlogOperation {
     int client_id;
@@ -25,8 +26,10 @@ void iniciaCliente(struct ClienteConectado* cliente, struct ClienteConectado* cl
 
 void imprime_mensagem_servidor(struct BlogOperation* operation);
 
-void le_mensagem_cliente(char* buf, struct BlogOperation* operation);
+void le_mensagem_cliente(char* buf, struct BlogOperation* operation, int client_id);
 
 void le_resposta_servidor(struct BlogOperation* operation, int* client_id);
 
-void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConectado* cliente, struct Topico* topicos, int qtd_topicos);
+void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConectado* cliente, struct Topico* topicos, int* qtd_topicos);
+
+void cria_novo_post(struct BlogOperation* operation,struct Topico* topicos);

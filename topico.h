@@ -10,7 +10,8 @@ struct Topico
     char* nome;
 };
 
-int verifica_topico(int topico, int* topicos_criados, int qtd_topicos);
-struct Topico cria_topico(char* topico, int* topicos_criados, int qtd_topicos);
-void lista_topicos_criados();
+int verifica_topico(char* topico, struct Topico* topicos_criados, int qtd_topicos);
+void cria_topico(char* nome_topico, struct Topico* topicos_criados, int* qtd_topicos);
+char* lista_topicos_criados(struct Topico* topicos_criados, int qtd_topicos);
 int traduz_topico(char* topico, struct Topico* topicos_criados, int qtd_topicos);
+void imprime_topicos_criados(char* topicos);
