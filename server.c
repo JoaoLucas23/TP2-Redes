@@ -12,6 +12,10 @@
 #define BUFSZ 1024
 
 struct ClienteConectado* clientes_conectados;
+struct Topico* topicos_criados;
+
+int qtd_topicos;
+int qtd_clientes;
 
 void usage(int argc, char **argv) {
     printf("usage %s <v4|v6> <server port>\n", argv[0]);
@@ -40,10 +44,10 @@ void * client_thread(void *data) {
     while (1)
     {
         size_t count = recv(cdata->csock, operation, sizeof(struct BlogOperation), 0);
-        trata_mensagem_cliente(operation, cliente);
+        trata_mensagem_cliente(operation, cliente,topicos_criados,qtd_topicos);
         imprime_mensagem_servidor(operation);
 
-        gera_resposta(operation);
+        gera_resposta(operation, topicos_criados);
         count = send(cdata->csock, operation, sizeof(struct BlogOperation), 0);
         if(count != sizeof(struct BlogOperation)) {
             logexit("send");

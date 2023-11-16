@@ -28,3 +28,5 @@ void imprime_mensagem_servidor(struct BlogOperation* operation);
 void le_mensagem_cliente(char* buf, struct BlogOperation* operation);
 
 void le_resposta_servidor(struct BlogOperation* operation, int* client_id);
+
+void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConectado* cliente, struct Topico* topicos, int qtd_topicos);

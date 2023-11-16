@@ -1,4 +1,5 @@
 #include "blog.h"
+#include "topico.h"
 
 #define BUFSZ 1024
 
@@ -140,9 +141,21 @@ void inscreve_cliente_topico(int topico, struct ClienteConectado* cliente, int t
     cliente->topicos_inscritos[cliente->qtd_topicos_inscritos-1] = topico;
 }
 
-void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConectado* cliente) {
+void desinscreve_cliente_topico(int topico, struct ClienteConectado* cliente) {
+    printf("cliente desinscrito\n");
+    // for (int i = 0; i < cliente->qtd_topicos_inscritos; i++)
+    // {
+    //     if (topico==cliente->topicos_inscritos[i])
+    //     {
+    //         cliente->qtd_topicos_inscritos++;
+    //         cliente->topicos_inscritos[cliente->qtd_topicos_inscritos-1] = topico;
+    //     }
+    // }
+}
 
-    int topico = traduz_topico(operation->topic);
+void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConectado* cliente, struct Topico* topicos, int qtd_topicos) {
+
+    int topico = traduz_topico(operation->topic,topicos, qtd_topicos);
 
     switch (operation->operation_type)
     {
@@ -168,3 +181,4 @@ void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConec
         break;
     }
 }
+
