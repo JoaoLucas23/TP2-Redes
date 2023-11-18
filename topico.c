@@ -64,7 +64,7 @@ void imprime_topicos_criados(char* topicos){
 int traduz_topico(char* topico, struct Topico* topicos_criados, int qtd_topicos) {
     for (int i = 0; i < qtd_topicos; i++)
     {
-        if(topicos_criados[i].nome == topico) return i;
+        if(strcmp(topicos_criados[i].nome,topico)==0) return topicos_criados[i].id;
     }
     return -1;
 }

@@ -40,11 +40,11 @@ void * client_thread(void *data) {
 
     struct BlogOperation* operation = malloc(sizeof(struct BlogOperation));
     iniciaBlogOperation(operation);
-    struct ClienteConectado* cliente = malloc(sizeof(struct ClienteConectado));
-    iniciaCliente(cliente, clientes_conectados, operation);
+    struct ClienteConectado cliente;
+    int Cliente = iniciaCliente(&cliente, clientes_conectados, operation);
     sockets_ativos[qtd_clientes] = cdata->csock;
+    printf("client %d connected\n", clientes_conectados[Cliente].id);
     qtd_clientes++;
-    printf("client %d connected\n", cliente->id);
     size_t count = send(cdata->csock, operation, sizeof(struct BlogOperation), 0);
     if(count != sizeof(struct BlogOperation)) {
         logexit("send");
@@ -55,18 +55,22 @@ void * client_thread(void *data) {
         //gera_resposta(operation, topicos_criados);
         count = recv(cdata->csock, operation, sizeof(struct BlogOperation), 0);
 
-        trata_mensagem_cliente(operation, cliente,topicos_criados,qtd_topicos);
+        printf("CLIENTE CONECTADO: %d\n",clientes_conectados[Cliente].id);
+        trata_mensagem_cliente(operation, &clientes_conectados[Cliente],topicos_criados,qtd_topicos);
         imprime_mensagem_servidor(operation);
 
         if(operation->operation_type==2) {
-            printf("ENTROU NO IF - type: %d server: %d content: %s\n", operation->operation_type,operation->server_response, operation->content);
-            /*count = send(cdata->csock, operation, sizeof(struct BlogOperation),0);
-            if(count != sizeof(struct BlogOperation)) {
-                logexit("send");
-            }*/
+            int topico = traduz_topico(operation->topic,topicos_criados,*(qtd_topicos));
             for (int i = 0; i < qtd_clientes; i++)
             {
-                send(sockets_ativos[i], operation, sizeof(struct BlogOperation),0);
+                printf("%d - TOPICOS INSCRITOS: %d\n",cliente.id,cliente.qtd_topicos_inscritos);
+                printf("%d - TOPICOS INSCRITOS: %d\n",clientes_conectados[i].id,clientes_conectados[i].qtd_topicos_inscritos);
+                for (int j = 0; j < clientes_conectados[i].qtd_topicos_inscritos; j++)
+                {                 
+                    if(clientes_conectados[i].topicos_inscritos[j] == topico){
+                        send(sockets_ativos[i], operation, sizeof(struct BlogOperation),0);
+                    } 
+                }
             }
         }
         else {

@@ -3,20 +3,23 @@
 
 #define BUFSZ 1024
 
-void iniciaCliente(struct ClienteConectado* cliente, struct ClienteConectado* clientes_conectados, struct BlogOperation* operation) {
+int iniciaCliente(struct ClienteConectado* cliente, struct ClienteConectado* clientes_conectados, struct BlogOperation* operation) {
     for(int i=0; i<10; i++) {
         if (clientes_conectados[i].id == 0)
         {
             clientes_conectados[i].id = i+1;
-            cliente->id = i+1;
-            cliente->qtd_topicos_inscritos = 0;
-            cliente->topicos_inscritos = (int*)malloc(10*sizeof(int));
+            clientes_conectados[i].qtd_topicos_inscritos = 0;
+            clientes_conectados[i].topicos_inscritos = (int*)malloc(10*sizeof(int));
             operation->client_id = i+1;
             operation->server_response = 1;
-            break;
+
+            cliente->id = clientes_conectados[i].id;
+            cliente->qtd_topicos_inscritos = clientes_conectados[i].qtd_topicos_inscritos;
+            cliente->topicos_inscritos = clientes_conectados[i].topicos_inscritos;
+           // *cliente = clientes_conectados[i];
+            return i;
         }
     }
-
 }
 
 void iniciaBlogOperation(struct BlogOperation* operation) {
@@ -130,20 +133,30 @@ void le_resposta_servidor(struct BlogOperation* operation, int* client_id) {
 
 void inscreve_cliente_topico(char* topico, struct ClienteConectado* cliente, int tipo_operacao,struct Topico* topicos, int* qtd_topicos) {
 
+    printf("cliente: %d - topicos: %d\n",cliente->id);
+
     int topico_id = verifica_topico(topico,topicos,*qtd_topicos);
 
     if (topico_id==0) {
         topico_id = cria_topico(topico, topicos, qtd_topicos);
-        printf("topicos_inscritos[%d] = %d\n",cliente->qtd_topicos_inscritos,topico_id);
-        cliente->topicos_inscritos[cliente->qtd_topicos_inscritos] = topico_id;
-        cliente->qtd_topicos_inscritos++;
     }
-    else if (tipo_operacao==4) printf("error: already subscribed\n");
+    else {
+        for (int i = 0; i < cliente->qtd_topicos_inscritos; i++)
+        {
+            if (topico_id==cliente->topicos_inscritos[i])
+            {                
+                printf("error: already subscribed\n");
+                return;
+            }
+            
+        }
+    } 
+    cliente->topicos_inscritos[cliente->qtd_topicos_inscritos] = topico_id;
+    cliente->qtd_topicos_inscritos++;
 }
 
 void desinscreve_cliente_topico(int topico, struct ClienteConectado* cliente) {
     printf("cliente desinscrito\n");
-
 }
 
 void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConectado* cliente, struct Topico* topicos, int* qtd_topicos) {
@@ -161,7 +174,7 @@ void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConec
     {
     case 2:
         inscreve_cliente_topico(operation->topic,cliente,operation->operation_type,topicos, qtd_topicos);
-        cria_novo_post(operation,topicos);
+        //cria_novo_post(operation,topicos);
         break;
     case 3:
         memcpy(operation->content,lista_topicos_criados(topicos, *qtd_topicos),255);
