@@ -12,12 +12,12 @@ TO-DO
     1- Conexao de multiplos clientes                        |   OK
     2- Servidor criar id do cliente e o informar            |   OK
     3- Estruturar troca de mensagens                        |   OK
-    4- Servidor armazenar clientes                          |
-    5- Servidor armazenar topicos e clientes inscritos      |
-    6- Cliente se inscrever em um topico                    |
-        6.1- Verificar se cliente ja esta inscrito          |
-    7- Cliente mandar mensagem em um topico                 |
-    8- Cliente inscrito receber notificacao de novo post    |
+    4- Servidor armazenar clientes                          |   OK
+    5- Servidor armazenar topicos e clientes inscritos      |   OK
+    6- Cliente se inscrever em um topico                    |   OK
+        6.1- Verificar se cliente ja esta inscrito          |   OK
+    7- Cliente mandar mensagem em um topico                 |   OK
+    8- Cliente inscrito receber notificacao de novo post    |   OK
 
 
 ESTRUTURAS

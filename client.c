@@ -27,15 +27,14 @@ void* input_thread(void *sock) {
     {   
         memset(buf, 0, BUFSZ);
         fgets(buf, BUFSZ-1, stdin);
-
         le_mensagem_cliente(buf, operation, *(client_id));
-
         size_t count = send(sock, operation, sizeof(struct BlogOperation), 0);
         if(count != sizeof(struct BlogOperation)) {
             logexit("send");
         }
+        if(operation->operation_type==5) break;
     }
-    free(operation);
+    //free(operation);
     pthread_exit(NULL);
 }
 
@@ -69,15 +68,17 @@ int main(int argc, char **argv) {
     addrtostr(addr, addrstr, BUFSZ);
     pthread_t tid;
     long sockNum = (long)s;
+    
     pthread_create(&tid, NULL, input_thread, (void *)sockNum);
 
     while (1)
     {   
         recv(s, operation, sizeof(struct BlogOperation), 0);
+        if (operation->operation_type==5) break;
         le_resposta_servidor(operation, client_id);
     }
     close(s);
-    free(operation);
-    free(client_id);
+    //free(operation);
+    //free(client_id);
     exit(EXIT_SUCCESS);
 }

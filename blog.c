@@ -3,7 +3,7 @@
 
 #define BUFSZ 1024
 
-int iniciaCliente(struct ClienteConectado* cliente, struct ClienteConectado* clientes_conectados, struct BlogOperation* operation) {
+int iniciaCliente(struct ClienteConectado* clientes_conectados, struct BlogOperation* operation) {
     for(int i=0; i<10; i++) {
         if (clientes_conectados[i].id == 0)
         {
@@ -12,14 +12,10 @@ int iniciaCliente(struct ClienteConectado* cliente, struct ClienteConectado* cli
             clientes_conectados[i].topicos_inscritos = (int*)malloc(10*sizeof(int));
             operation->client_id = i+1;
             operation->server_response = 1;
-
-            cliente->id = clientes_conectados[i].id;
-            cliente->qtd_topicos_inscritos = clientes_conectados[i].qtd_topicos_inscritos;
-            cliente->topicos_inscritos = clientes_conectados[i].topicos_inscritos;
-           // *cliente = clientes_conectados[i];
             return i;
         }
     }
+    return -1;
 }
 
 void iniciaBlogOperation(struct BlogOperation* operation) {
@@ -29,29 +25,6 @@ void iniciaBlogOperation(struct BlogOperation* operation) {
     strcpy(operation->topic, "");
     strcpy(operation->content, "");
 };
-
-void imprime_mensagem_servidor(struct BlogOperation* operation) {
-    switch (operation->operation_type)
-    {
-    case 1:
-        printf("client %d connected\n", operation->client_id);
-        break;
-    case 2:
-        printf("new post added in %s by %d\n", operation->topic, operation->client_id);
-        break;
-    case 4:
-        printf("client %d subscribed to %s\n", operation->client_id, operation->topic);
-        break;
-    case 5:
-        printf("client %d disconnected\n", operation->client_id);
-        break;
-    case 6:
-        printf("client %d unsubscribed to %s\n", operation->client_id, operation->topic);
-        break;
-    default:
-        break;
-    }
-}
 
 int traduz_acao(char* acao) {
     char* acoes_possiveis[6] = {
@@ -77,6 +50,7 @@ void le_mensagem_cliente(char* buf, struct BlogOperation* operation, int client_
     operation->server_response = 0;
     operation->client_id = client_id;
 
+
     switch (operation->operation_type)
     {
     case 1:
@@ -89,15 +63,9 @@ void le_mensagem_cliente(char* buf, struct BlogOperation* operation, int client_
         fgets(buf, BUFSZ-1, stdin);
         strcpy(operation->content,buf);
         break;
-    case 3:    
-        printf("topicos criados:\n");
-        break;
     case 4:
         buf = strtok(NULL, " \n");
         strcpy(operation->topic,buf);
-        break;
-    case 5:
-        printf("desconectando\n");
         break;
     case 6:
         buf = strtok(NULL, " \n");
@@ -106,7 +74,6 @@ void le_mensagem_cliente(char* buf, struct BlogOperation* operation, int client_
     default:
         break;
     }
-    
 }
 
 void le_resposta_servidor(struct BlogOperation* operation, int* client_id) {
@@ -133,8 +100,6 @@ void le_resposta_servidor(struct BlogOperation* operation, int* client_id) {
 
 void inscreve_cliente_topico(char* topico, struct ClienteConectado* cliente, int tipo_operacao,struct Topico* topicos, int* qtd_topicos) {
 
-    printf("cliente: %d - topicos: %d\n",cliente->id);
-
     int topico_id = verifica_topico(topico,topicos,*qtd_topicos);
 
     if (topico_id==0) {
@@ -153,6 +118,7 @@ void inscreve_cliente_topico(char* topico, struct ClienteConectado* cliente, int
     } 
     cliente->topicos_inscritos[cliente->qtd_topicos_inscritos] = topico_id;
     cliente->qtd_topicos_inscritos++;
+    printf("client %d subscribed to %s\n", cliente->id, topico);
 }
 
 void desinscreve_cliente_topico(int topico, struct ClienteConectado* cliente) {
@@ -172,9 +138,11 @@ void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConec
 
     switch (operation->operation_type)
     {
+    case 1:
+        printf("client %d connected\n", operation->client_id);
+        break;
     case 2:
-        inscreve_cliente_topico(operation->topic,cliente,operation->operation_type,topicos, qtd_topicos);
-        //cria_novo_post(operation,topicos);
+        printf("new post added in %s by %d\n", operation->topic, operation->client_id);
         break;
     case 3:
         memcpy(operation->content,lista_topicos_criados(topicos, *qtd_topicos),255);
@@ -183,10 +151,12 @@ void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConec
         inscreve_cliente_topico(operation->topic,cliente,operation->operation_type,topicos, qtd_topicos);
         break;
     case 5:
+        // todo: criar funcao de retirar cliente
         printf("client %d disconnected\n", cliente->id);
         break;
     case 6:
         desinscreve_cliente_topico(topico,cliente);
+        printf("client %d unsubscribed to %s\n", operation->client_id, operation->topic);
         break;
     default:
         break;

@@ -40,10 +40,10 @@ void * client_thread(void *data) {
 
     struct BlogOperation* operation = malloc(sizeof(struct BlogOperation));
     iniciaBlogOperation(operation);
-    struct ClienteConectado cliente;
-    int Cliente = iniciaCliente(&cliente, clientes_conectados, operation);
+
+    int cliente_atual = iniciaCliente(clientes_conectados, operation);
     sockets_ativos[qtd_clientes] = cdata->csock;
-    printf("client %d connected\n", clientes_conectados[Cliente].id);
+    printf("client %d connected\n", clientes_conectados[cliente_atual].id);
     qtd_clientes++;
     size_t count = send(cdata->csock, operation, sizeof(struct BlogOperation), 0);
     if(count != sizeof(struct BlogOperation)) {
@@ -52,19 +52,13 @@ void * client_thread(void *data) {
 
     while (1)
     {
-        //gera_resposta(operation, topicos_criados);
         count = recv(cdata->csock, operation, sizeof(struct BlogOperation), 0);
-
-        printf("CLIENTE CONECTADO: %d\n",clientes_conectados[Cliente].id);
-        trata_mensagem_cliente(operation, &clientes_conectados[Cliente],topicos_criados,qtd_topicos);
-        imprime_mensagem_servidor(operation);
+        trata_mensagem_cliente(operation, &clientes_conectados[cliente_atual],topicos_criados,qtd_topicos);
 
         if(operation->operation_type==2) {
             int topico = traduz_topico(operation->topic,topicos_criados,*(qtd_topicos));
             for (int i = 0; i < qtd_clientes; i++)
             {
-                printf("%d - TOPICOS INSCRITOS: %d\n",cliente.id,cliente.qtd_topicos_inscritos);
-                printf("%d - TOPICOS INSCRITOS: %d\n",clientes_conectados[i].id,clientes_conectados[i].qtd_topicos_inscritos);
                 for (int j = 0; j < clientes_conectados[i].qtd_topicos_inscritos; j++)
                 {                 
                     if(clientes_conectados[i].topicos_inscritos[j] == topico){
@@ -79,10 +73,14 @@ void * client_thread(void *data) {
                 logexit("send");
             }
         }
-
+        if (operation->operation_type==5)
+        {
+            close(cdata->csock);
+            break;
+        }
+        
     }
-    close(cdata->csock);
-    free(cdata);
+    
     pthread_exit(EXIT_SUCCESS);
 }
 
@@ -98,9 +96,9 @@ int main(int argc, char **argv) {
 
     int s;
     s = socket(storage.ss_family, SOCK_STREAM, 0);
-    if (s == -1) {
+    if(s==-1){
         logexit("socket");
-    } 
+    }
 
     int enable=1;
     if(setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) != 0) {
@@ -118,7 +116,7 @@ int main(int argc, char **argv) {
 
     char addrstr[BUFSZ];
     addrtostr(addr, addrstr, BUFSZ);
-    printf("bound to %s, waiting connections \n", addrstr);
+    //printf("bound to %s, waiting connections \n", addrstr);
 
     clientes_conectados = (struct ClienteConectado *)malloc(10 * sizeof(struct ClienteConectado));
     topicos_criados = (struct Topico *)malloc(10 * sizeof(struct Topico));
@@ -126,8 +124,6 @@ int main(int argc, char **argv) {
 
     qtd_clientes = 0;
     (*qtd_topicos) = 0;
-    int client_check[MAX_CLI];
-    memset(client_check, 0, MAX_CLI*sizeof(int));
 
     while (1)
     {
@@ -143,14 +139,9 @@ int main(int argc, char **argv) {
         struct client_data *cdata = malloc(sizeof(*cdata));
         cdata->csock = csock;
         memcpy(&(cdata->storage), &storage, sizeof(storage));
-
-        int i=0;
-        while (i<MAX_CLI) i++;
                    
-        send(csock,"TESTE",BUFSZ,0);
         pthread_t tid;
         pthread_create(&tid, NULL, client_thread, cdata);
     }
-
     exit(EXIT_SUCCESS);
 };

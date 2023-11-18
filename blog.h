@@ -22,9 +22,7 @@ struct ClienteConectado{
 
 void iniciaBlogOperation(struct BlogOperation* operation);
 
-int iniciaCliente(struct ClienteConectado* cliente, struct ClienteConectado* clientes_conectados, struct BlogOperation* operation);
-
-void imprime_mensagem_servidor(struct BlogOperation* operation);
+int iniciaCliente(struct ClienteConectado* clientes_conectados, struct BlogOperation* operation);
 
 void le_mensagem_cliente(char* buf, struct BlogOperation* operation, int client_id);
 
