@@ -10,12 +10,15 @@
 #include <pthread.h>
 
 #define BUFSZ 1024
+#define MAX_CLI 10
 
 struct ClienteConectado* clientes_conectados;
 struct Topico* topicos_criados;
 
 int* qtd_topicos;
 int qtd_clientes;
+
+int sockets_ativos[MAX_CLI];
 
 void usage(int argc, char **argv) {
     printf("usage %s <v4|v6> <server port>\n", argv[0]);
@@ -31,7 +34,7 @@ struct client_data {
 void * client_thread(void *data) {     
     struct client_data *cdata = (struct client_data *)data;
     struct sockaddr *caddr = (struct sockaddr *) (&cdata->storage);
-
+    
     char caddrstr[BUFSZ];
     addrtostr(caddr, caddrstr, BUFSZ);
 
@@ -39,22 +42,43 @@ void * client_thread(void *data) {
     iniciaBlogOperation(operation);
     struct ClienteConectado* cliente = malloc(sizeof(struct ClienteConectado));
     iniciaCliente(cliente, clientes_conectados, operation);
+    sockets_ativos[qtd_clientes] = cdata->csock;
+    qtd_clientes++;
     printf("client %d connected\n", cliente->id);
-    
+    size_t count = send(cdata->csock, operation, sizeof(struct BlogOperation), 0);
+    if(count != sizeof(struct BlogOperation)) {
+        logexit("send");
+    }
+
     while (1)
     {
         //gera_resposta(operation, topicos_criados);
-        size_t count = recv(cdata->csock, operation, sizeof(struct BlogOperation), 0);
+        count = recv(cdata->csock, operation, sizeof(struct BlogOperation), 0);
+
         trata_mensagem_cliente(operation, cliente,topicos_criados,qtd_topicos);
         imprime_mensagem_servidor(operation);
 
-        count = send(cdata->csock, operation, sizeof(struct BlogOperation), 0);
-        if(count != sizeof(struct BlogOperation)) {
-            logexit("send");
+        if(operation->operation_type==2) {
+            printf("ENTROU NO IF - type: %d server: %d content: %s\n", operation->operation_type,operation->server_response, operation->content);
+            /*count = send(cdata->csock, operation, sizeof(struct BlogOperation),0);
+            if(count != sizeof(struct BlogOperation)) {
+                logexit("send");
+            }*/
+            for (int i = 0; i < qtd_clientes; i++)
+            {
+                send(sockets_ativos[i], operation, sizeof(struct BlogOperation),0);
+            }
+        }
+        else {
+            count = send(cdata->csock, operation, sizeof(struct BlogOperation), 0);
+            if(count != sizeof(struct BlogOperation)) {
+                logexit("send");
+            }
         }
 
     }
     close(cdata->csock);
+    free(cdata);
     pthread_exit(EXIT_SUCCESS);
 }
 
@@ -96,7 +120,10 @@ int main(int argc, char **argv) {
     topicos_criados = (struct Topico *)malloc(10 * sizeof(struct Topico));
     qtd_topicos = (int*)malloc(sizeof(int));
 
+    qtd_clientes = 0;
     (*qtd_topicos) = 0;
+    int client_check[MAX_CLI];
+    memset(client_check, 0, MAX_CLI*sizeof(int));
 
     while (1)
     {
@@ -113,6 +140,10 @@ int main(int argc, char **argv) {
         cdata->csock = csock;
         memcpy(&(cdata->storage), &storage, sizeof(storage));
 
+        int i=0;
+        while (i<MAX_CLI) i++;
+                   
+        send(csock,"TESTE",BUFSZ,0);
         pthread_t tid;
         pthread_create(&tid, NULL, client_thread, cdata);
     }

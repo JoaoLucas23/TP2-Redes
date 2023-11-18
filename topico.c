@@ -1,23 +1,26 @@
 #include "topico.h"
 
 int verifica_topico(char* topico, struct Topico* topicos_criados, int qtd_topicos){
+    
     for (int i = 0; i < qtd_topicos; i++)
     {
         if(strcmp(topico,topicos_criados[i].nome)==0) {
-            return i;
+            return i+1;
         } 
     }
     return 0;
 }
 
-void cria_topico(char* nome_topico, struct Topico* topicos_criados, int* qtd_topicos){
+int cria_topico(char* nome_topico, struct Topico* topicos_criados, int* qtd_topicos){
+   
     struct Topico topico;
-    topico.id = *qtd_topicos;
+    topico.id = *(qtd_topicos) + 1;
     topico.nome = strdup(nome_topico);
 
     topicos_criados[*qtd_topicos] = topico;
-
     (*qtd_topicos)++;
+
+    return topico.id;
 }
 
 char* lista_topicos_criados(struct Topico* topicos_criados, int qtd_topicos){
@@ -26,8 +29,6 @@ char* lista_topicos_criados(struct Topico* topicos_criados, int qtd_topicos){
     {
         return "";
     }
-    
-    printf("passou dos topicos\n");
 
     // Calculando o tamanho total necessário para a string
     int tamanhoTotal = 0;
