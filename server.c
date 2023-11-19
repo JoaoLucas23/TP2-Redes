@@ -75,10 +75,13 @@ void * client_thread(void *data) {
         }
         if (operation->operation_type==5)
         {
+            clientes_conectados[cliente_atual].id = 0;
+            clientes_conectados[cliente_atual].qtd_topicos_inscritos = 0;
+            free(clientes_conectados[cliente_atual].topicos_inscritos);
+            clientes_conectados[cliente_atual].topicos_inscritos = NULL;    
             close(cdata->csock);
             break;
-        }
-        
+        }   
     }
     
     pthread_exit(EXIT_SUCCESS);

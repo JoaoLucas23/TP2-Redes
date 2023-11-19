@@ -151,7 +151,6 @@ void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConec
         inscreve_cliente_topico(operation->topic,cliente,operation->operation_type,topicos, qtd_topicos);
         break;
     case 5:
-        // todo: criar funcao de retirar cliente
         printf("client %d disconnected\n", cliente->id);
         break;
     case 6:
