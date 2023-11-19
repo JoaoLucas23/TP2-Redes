@@ -28,6 +28,7 @@ void* input_thread(void *sock) {
         memset(buf, 0, BUFSZ);
         fgets(buf, BUFSZ-1, stdin);
         le_mensagem_cliente(buf, operation, *(client_id));
+        operation->server_response = 0;
         size_t count = send(sock, operation, sizeof(struct BlogOperation), 0);
         if(count != sizeof(struct BlogOperation)) {
             logexit("send");

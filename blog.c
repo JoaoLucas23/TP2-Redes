@@ -89,16 +89,23 @@ void le_resposta_servidor(struct BlogOperation* operation, int* client_id) {
         break;
     case 2:
         printf("new post added in %s by %d\n%s\n",operation->topic,operation->client_id,operation->content);
-    break;
+        break;
     case 3:
         imprime_topicos_criados(operation->content);
+        break;
+    case 4:
+        if (strlen(operation->content)>0)
+        {
+            printf("%s\n",operation->content);
+        }
+        break;  
     default:
         break;
     } 
     
 }
 
-void inscreve_cliente_topico(char* topico, struct ClienteConectado* cliente, int tipo_operacao,struct Topico* topicos, int* qtd_topicos) {
+int inscreve_cliente_topico(char* topico, struct ClienteConectado* cliente, int tipo_operacao,struct Topico* topicos, int* qtd_topicos) {
 
     int topico_id = verifica_topico(topico,topicos,*qtd_topicos);
 
@@ -110,8 +117,7 @@ void inscreve_cliente_topico(char* topico, struct ClienteConectado* cliente, int
         {
             if (topico_id==cliente->topicos_inscritos[i])
             {                
-                printf("error: already subscribed\n");
-                return;
+                return 0;
             }
             
         }
@@ -119,6 +125,7 @@ void inscreve_cliente_topico(char* topico, struct ClienteConectado* cliente, int
     cliente->topicos_inscritos[cliente->qtd_topicos_inscritos] = topico_id;
     cliente->qtd_topicos_inscritos++;
     printf("client %d subscribed to %s\n", cliente->id, topico);
+    return 1;
 }
 
 void desinscreve_cliente_topico(int topico, struct ClienteConectado* cliente) {
@@ -145,10 +152,12 @@ void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConec
         printf("new post added in %s by %d\n", operation->topic, operation->client_id);
         break;
     case 3:
-        memcpy(operation->content,lista_topicos_criados(topicos, *qtd_topicos),255);
+        strcpy(operation->content,lista_topicos_criados(topicos, *qtd_topicos));
         break;
     case 4:
-        inscreve_cliente_topico(operation->topic,cliente,operation->operation_type,topicos, qtd_topicos);
+        if(!inscreve_cliente_topico(operation->topic,cliente,operation->operation_type,topicos, qtd_topicos)){
+            strcpy(operation->content,"error: already subscribed");
+        }
         break;
     case 5:
         printf("client %d disconnected\n", cliente->id);

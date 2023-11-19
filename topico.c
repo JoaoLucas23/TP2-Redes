@@ -27,7 +27,7 @@ char* lista_topicos_criados(struct Topico* topicos_criados, int qtd_topicos){
 
     if (qtd_topicos <= 0)
     {
-        return "";
+        return "no topics available";
     }
 
     // Calculando o tamanho total necessário para a string
@@ -46,9 +46,10 @@ char* lista_topicos_criados(struct Topico* topicos_criados, int qtd_topicos){
     // Construindo a string
     resultado[0] = '\0'; // Inicializando a string vazia
     for (int i = 0; i < qtd_topicos; i++) {
+        printf("resultado: %s\n");
         strcat(resultado, topicos_criados[i].nome);
         if (i < qtd_topicos - 1) {
-            strcat(resultado, ";\n");
+            strcat(resultado, ";");
         }  
     }
 
@@ -56,9 +57,7 @@ char* lista_topicos_criados(struct Topico* topicos_criados, int qtd_topicos){
 }
 
 void imprime_topicos_criados(char* topicos){
-
-    printf("%s", topicos);
-    
+    printf("%s\n", topicos);
 }
 
 int traduz_topico(char* topico, struct Topico* topicos_criados, int qtd_topicos) {
