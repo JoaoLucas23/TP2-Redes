@@ -88,13 +88,13 @@ void le_resposta_servidor(struct BlogOperation* operation, int* client_id) {
         *(client_id) = operation->client_id;
         break;
     case 2:
-        printf("new post added in %s by %d\n%s\n",operation->topic,operation->client_id,operation->content);
+        printf("new post added in %s by %d\n%s",operation->topic,operation->client_id,operation->content);
         break;
     case 3:
         imprime_topicos_criados(operation->content);
         break;
     case 4:
-        if (strlen(operation->content)>0)
+        if (strcmp(operation->content,"")!=0)
         {
             printf("%s\n",operation->content);
         }
@@ -169,6 +169,9 @@ void trata_mensagem_cliente(struct BlogOperation* operation, struct ClienteConec
     case 4:
         if(!inscreve_cliente_topico(operation->topic,cliente,operation->operation_type,topicos, qtd_topicos)){
             strcpy(operation->content,"error: already subscribed");
+        }
+        else {
+            strcpy(operation->content,"");
         }
         break;
     case 5:

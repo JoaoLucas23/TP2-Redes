@@ -35,7 +35,7 @@ void* input_thread(void *sock) {
         }
         if(operation->operation_type==5) break;
     }
-    //free(operation);
+    free(operation);
     pthread_exit(NULL);
 }
 
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
         le_resposta_servidor(operation, client_id);
     }
     close(s);
-    //free(operation);
-    //free(client_id);
+    free(operation);
+    free(client_id);
     exit(EXIT_SUCCESS);
 }

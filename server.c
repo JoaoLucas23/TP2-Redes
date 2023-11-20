@@ -83,7 +83,7 @@ void * client_thread(void *data) {
             break;
         }   
     }
-    
+    free(operation);
     pthread_exit(EXIT_SUCCESS);
 }
 
@@ -147,5 +147,9 @@ int main(int argc, char **argv) {
         pthread_t tid;
         pthread_create(&tid, NULL, client_thread, cdata);
     }
+
+    free(clientes_conectados);
+    free(topicos_criados);
+    free(qtd_topicos);
     exit(EXIT_SUCCESS);
 };
