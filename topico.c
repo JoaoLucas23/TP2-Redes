@@ -46,7 +46,6 @@ char* lista_topicos_criados(struct Topico* topicos_criados, int qtd_topicos){
     // Construindo a string
     resultado[0] = '\0'; // Inicializando a string vazia
     for (int i = 0; i < qtd_topicos; i++) {
-        printf("resultado: %s\n");
         strcat(resultado, topicos_criados[i].nome);
         if (i < qtd_topicos - 1) {
             strcat(resultado, ";");

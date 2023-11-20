@@ -129,6 +129,18 @@ int inscreve_cliente_topico(char* topico, struct ClienteConectado* cliente, int 
 }
 
 void desinscreve_cliente_topico(int topico, struct ClienteConectado* cliente) {
+    for (int i = 0; i < cliente->qtd_topicos_inscritos; i++)
+    {
+        if (topico==cliente->topicos_inscritos[i])
+        {
+            cliente->topicos_inscritos[i] = 0;
+            cliente->qtd_topicos_inscritos--;
+            return;
+        }
+        
+    }
+    
+
     printf("cliente desinscrito\n");
 }
 
